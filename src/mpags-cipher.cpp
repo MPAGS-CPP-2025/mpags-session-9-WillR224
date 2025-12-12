@@ -3,6 +3,7 @@
 #include "TransformChar.hpp"
 #include "CaesarCipher.hpp"
 #include "CihperMode.hpp"
+
 #include <cctype>
 #include <fstream>
 #include <iostream>
