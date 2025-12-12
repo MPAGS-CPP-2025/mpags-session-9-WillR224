@@ -1,7 +1,8 @@
 #include "ProcessCommandLine.hpp"
 #include "RunCaesarCipher.hpp"
 #include "TransformChar.hpp"
-
+#include "CaesarCipher.hpp"
+#include "CihperMode.hpp"
 #include <cctype>
 #include <fstream>
 #include <iostream>
@@ -85,34 +86,10 @@ int main(int argc, char* argv[])
 
     // We have the key as a string, but the Caesar cipher needs an unsigned long, so we first need to convert it
     // We default to having a key of 0, i.e. no encryption, if no key was provided on the command line
-    std::size_t caesarKey{0};
-    if (!settings.cipherKey.empty()) {
-        // Before doing the conversion we should check that the string contains a
-        // valid positive integer.
-        // Here we do that by looping through each character and checking that it
-        // is a digit. What is rather hard to check is whether the number is too
-        // large to be represented by an unsigned long, so we've omitted that for
-        // the time being.
-        // (Since the conversion function std::stoul will throw an exception if the
-        // string does not represent a valid unsigned long, we could check for and
-        // handled that instead but we only cover exceptions very briefly on the
-        // final day of this course - they are a very complex area of C++ that
-        // could take an entire course on their own!)
-        for (const auto& elem : settings.cipherKey) {
-            if (!std::isdigit(elem)) {
-                std::cerr
-                    << "[error] cipher key must be an unsigned long integer for Caesar cipher,\n"
-                    << "        the supplied key (" << settings.cipherKey
-                    << ") could not be successfully converted" << std::endl;
-                return 1;
-            }
-        }
-        caesarKey = std::stoul(settings.cipherKey);
-    }
+    CaesarCipher cipher{settings.cipherKey};
 
     // Run the Caesar cipher (using the specified key and encrypt/decrypt flag) on the input text
-    std::string outputText{
-        runCaesarCipher(inputText, caesarKey, settings.encrypt)};
+    cipher.applyCipher(inputText, settings.encrypt);
 
     // Output the encrypted/decrypted text to stdout/file
     if (!settings.outputFile.empty()) {
@@ -125,11 +102,11 @@ int main(int argc, char* argv[])
         }
 
         // Print the encrypted/decrypted text to the file
-        outputStream << outputText << std::endl;
+        outputStream << cipher.outputText_ << std::endl;
 
     } else {
         // Print the encrypted/decrypted text to the screen
-        std::cout << outputText << std::endl;
+        std::cout << cipher.outputText_ << std::endl;
     }
 
     // No requirement to return from main, but we do so for clarity
